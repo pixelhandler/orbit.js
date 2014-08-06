@@ -148,6 +148,49 @@ test("#remove - can delete records", function() {
   });
 });
 
+test("#test - can test success (PATCH request)", function() {
+  expect(2);
+
+  server.respondWith('PATCH', '/planets/12345', function(xhr) {
+    deepEqual(JSON.parse(xhr.requestBody), {op: 'test', path: '/planets/12345/classification', value: 'gas giant'}, 'PATCH "test" operation: success');
+    xhr.respond(204,
+                {'Content-Type': 'application/json-patch+json'},
+                JSON.stringify({}));
+  });
+
+  stop();
+  source.test('planet', {id: 12345}, 'classification', 'gas giant').then(function() {
+    start();
+    ok(true, 'record test succeeds');
+  });
+});
+
+/* TODO figure out how to test 400 response, expect test to fail
+test("#test - can test failure (PATCH request)", function() {
+  expect(2);
+
+  server.respondWith('PATCH', '/planets/12345', function(xhr) {
+    deepEqual(JSON.parse(xhr.requestBody), {op: 'test', path: '/planets/12345/classification', value: 'gas molecule'}, 'PATCH "test" operation: fails');
+    xhr.respond(400,
+                {'Content-Type': 'application/json-patch+json'},
+                JSON.stringify({}));
+  });
+
+  stop();
+  source.test('planet', {id: 12345}, 'classification', 'gas molecule')
+    .then(
+      function() {
+        start();
+        ok(false, 'test operation should result in failure');
+      },
+      function(reason) {
+        console.assert(false, reason);
+        start();
+        ok(true, 'test operation should result in failure: ' + reason);
+      });
+});
+*/
+
 test("#addLink - can patch records with inverse relationships", function() {
   expect(3);
 
